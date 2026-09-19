@@ -1,0 +1,20 @@
+ERRORS REPORT - 2026-09-19
+============================
+
+1) `npm run lint` (ESLint) hangs / produces no output indefinitely
+   - Tried: ran from repo root and scoped to single files, 5-minute timeout.
+   - Result: no output, must be killed. ESLint config is standard
+     (eslint.config.mjs -> eslint-config-next). Appears to be an
+     environment problem on this Windows machine, NOT a code error.
+
+2) `npm run build` (next build) hangs / produces no output indefinitely
+   - Tried: with CI=1, 7-minute timeout. Result: no output.
+   - `npx tsc --noEmit` DOES pass cleanly (all type checks OK).
+   - Also appears to be an environment problem. Please run
+     "npm run build" on your machine to confirm.
+
+Everything else was completed and verified:
+   - tsc clean
+   - pdf-parse + mammoth text extraction tested with a real PDF
+   - prisma db push succeeded (resumeText column added to Neon)
+   - Chat fix (Accept header) verified by live API call

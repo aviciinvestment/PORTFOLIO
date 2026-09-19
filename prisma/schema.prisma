@@ -62,6 +62,7 @@ model SiteContent {
   testimonialName   String   @default("Angelina Jolie")
   testimonialRole   String   @default("Business owner")
   resumeUrl         String?
+  resumeText        String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

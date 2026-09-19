@@ -11,6 +11,7 @@ const FIELDS = [
   "testimonialName",
   "testimonialRole",
   "resumeUrl",
+  "resumeText",
 ] as const;
 
 export async function GET() {

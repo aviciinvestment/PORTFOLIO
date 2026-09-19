@@ -103,6 +103,7 @@ type SiteContent = {
   testimonialName: string;
   testimonialRole: string;
   resumeUrl: string | null;
+  resumeText: string | null;
 };
 
 type Testimonial = {
@@ -272,14 +273,14 @@ export function AdminDashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0604] text-[#f8fafc] relative overflow-hidden font-sans">
+    <main className="min-h-screen bg-[#0a0604] text-[#f8fafc] relative overflow-x-hidden font-sans">
       <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#d9480f]/15 rounded-full blur-[120px] pointer-events-none translate-x-1/4 -translate-y-1/4" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#d9480f]/10 rounded-full blur-[100px] pointer-events-none -translate-x-1/4 translate-y-1/4" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-6 md:py-8 relative z-10 w-full">
         {/* Header */}
-        <header className="flex justify-between items-center mb-10">
-          <div className="flex items-center gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 mb-8 md:mb-10">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <Link
               href="/"
               className="p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white transition-colors"
@@ -287,23 +288,23 @@ export function AdminDashboard() {
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
                 Admin<span className="text-[#ff5c00]">.</span>
               </h1>
-              <p className="text-sm text-white/50">Victory portfolio management</p>
+              <p className="text-xs md:text-sm text-white/50 truncate">Victory portfolio management</p>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleSyncRag}
               disabled={syncing}
-              className="flex items-center gap-2 text-xs px-4 py-2 rounded-full bg-[#ff5c00]/10 border border-[#ff5c00]/20 text-[#ff5c00] hover:bg-[#ff5c00]/20 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 text-xs px-3.5 md:px-4 py-2.5 rounded-full bg-[#ff5c00]/10 border border-[#ff5c00]/20 text-[#ff5c00] hover:bg-[#ff5c00]/20 transition-colors disabled:opacity-50"
             >
               {syncing ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
               {syncing ? "Syncing RAG..." : "Sync AI Data"}
             </button>
-            <div className="flex items-center gap-2 text-xs px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70">
+            <div className="hidden sm:flex items-center gap-2 text-xs px-4 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               Connected to Neon
             </div>
@@ -324,13 +325,13 @@ export function AdminDashboard() {
         ) : (
           <>
             {/* Tabs */}
-            <div className="flex flex-wrap items-center gap-2 mb-8">
+            <div className="flex flex-nowrap md:flex-wrap items-center gap-2 mb-8 overflow-x-auto pb-1 -mx-1 px-1">
               {TABS.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTab(t.id)}
                   className={clsx(
-                    "flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all border",
+                    "flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all border whitespace-nowrap",
                     tab === t.id
                       ? "bg-[#ff5c00] text-white border-transparent shadow-[0_0_20px_rgba(255,92,0,0.35)]"
                       : "bg-white/5 text-white/60 border-white/10 hover:text-white"
@@ -422,7 +423,7 @@ function DashboardTab({
   const stats = data.stats;
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard
           label="Projects"
           value={stats?.projects ?? 0}
@@ -774,7 +775,7 @@ function ProjectsTab({
         {projects.map((p) => (
           <div
             key={p.id}
-            className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+            className="flex items-center justify-between gap-4 px-4 sm:px-6 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
           >
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{p.title}</p>
@@ -1228,7 +1229,7 @@ function MessagesTab({
                 <p className="text-sm text-white/70 whitespace-pre-wrap leading-relaxed mb-5">
                   {m.message}
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <a
                     href={`mailto:${m.email}`}
                     className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white transition-colors"
@@ -1300,6 +1301,7 @@ const DEFAULT_SITE_CONTENT: SiteContent = {
   testimonialName: "Angelina Jolie",
   testimonialRole: "Business owner",
   resumeUrl: null,
+  resumeText: null,
 };
 
 function SiteTab({
@@ -1414,11 +1416,12 @@ function SiteTab({
                             const data = await res.json();
                             const newUrl = data.url;
                             
-                            // Automatically save the URL
+                            // Automatically save the URL and extracted CV text
                             const payload: Record<string, string> = {};
                             for (const f of SITE_FIELDS) {
                               payload[f.key] = f.key === "resumeUrl" ? newUrl : (values[f.key] ?? "");
                             }
+                            payload.resumeText = data.text ?? "";
                             
                             const saved = await apiFetch<SiteContent>("/api/admin/site-content", {
                               method: "PUT",
@@ -1600,7 +1603,7 @@ function SocialsTab({
         {socials.map((s) => (
           <div
             key={s.id}
-            className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+            className="flex items-center justify-between gap-4 px-4 sm:px-6 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
           >
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{s.platform}</p>
@@ -1787,7 +1790,7 @@ function TestimonialsTab({
         {testimonials.map((t) => (
           <div
             key={t.id}
-            className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+            className="flex items-center justify-between gap-4 px-4 sm:px-6 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
           >
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{t.name}</p>

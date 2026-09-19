@@ -11,10 +11,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Victory Akunna",
-  description: "A stunning high-end portfolio for Victory Akunna",
+  title: "victory akunna",
+  description: "Victory Akunna — high-end portfolio",
   icons: {
     icon: "/sammy_3d.png",
+    apple: "/sammy_3d.png",
   },
 };
 

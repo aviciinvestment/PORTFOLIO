@@ -38,6 +38,28 @@ async function upsertToPinecone(chunks: Chunk[]) {
   return vectors.length;
 }
 
+function chunkText(text: string, maxLen = 1200): string[] {
+  const paragraphs = text
+    .split(/\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const chunks: string[] = [];
+  let current = "";
+
+  for (const para of paragraphs) {
+    if ((current + "\n" + para).length > maxLen && current) {
+      chunks.push(current);
+      current = para;
+    } else {
+      current = current ? current + "\n" + para : para;
+    }
+  }
+  if (current) chunks.push(current);
+
+  return chunks;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -70,6 +92,17 @@ export async function POST(req: Request) {
         text: `Testimonial highlight: "${site.testimonialQuote}" - ${site.testimonialName}, ${site.testimonialRole}.`,
         metadata: { type: "testimonial" },
       });
+
+      if (site.resumeText && site.resumeText.trim()) {
+        const cvSections = chunkText(site.resumeText);
+        cvSections.forEach((section, i) => {
+          chunks.push({
+            id: `cv-${i}`,
+            text: `From Victory's CV/Resume (section ${i + 1}):\n${section}`,
+            metadata: { type: "cv" },
+          });
+        });
+      }
     }
 
     skills.forEach((skill) => {
