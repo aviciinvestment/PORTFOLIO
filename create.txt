@@ -96,7 +96,7 @@ PART B - DEPLOY THE NEXT.JS SITE TO VERCEL
    NVIDIA_API_KEY            = your NVIDIA API key
    NVIDIA_EMBEDDING_API_KEY  = your NVIDIA embedding key
    PINECONE_API_KEY          = your Pinecone API key
-   NEXT_PUBLIC_ADMIN_EMAIL   = the email allowed to sign into /admin
+   ADMIN_EMAIL               = the email allowed to sign into /admin
                                (e.g. victorychibuakunna@gmail.com)
    CHAT_WORKER_URL           = https://victory-chatbot.<your-subdomain>.workers.dev
                                (from Part A step 7. Optional - chat still
@@ -132,7 +132,7 @@ PART B - DEPLOY THE NEXT.JS SITE TO VERCEL
 
 6. Fill the site with content and build the RAG index:
    - Open https://your-domain.com/admin and sign in with the Google
-     account that matches NEXT_PUBLIC_ADMIN_EMAIL.
+     account that matches ADMIN_EMAIL.
    - In the admin dashboard click "Sync RAG" so the chatbot can answer
      from your projects/skills/experience. (This calls /api/admin/sync-rag
      which writes vectors into Pinecone.)

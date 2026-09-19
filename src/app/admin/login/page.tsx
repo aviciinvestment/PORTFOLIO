@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 
 import { auth, googleProvider } from "@/lib/firebase";
+import { isAdminEmail } from "@/lib/admin";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Shield, Loader2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -24,7 +25,7 @@ function AdminLoginContent() {
       getRedirectResult(auth).then(async (result) => {
         if (result) {
           const user = result.user;
-          if (user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+          if (await isAdminEmail(user.email ?? "")) {
             router.push("/admin");
           } else {
             setError("Access denied. You do not have admin privileges.");
@@ -38,7 +39,7 @@ function AdminLoginContent() {
       // 2. Also listen for general auth state
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
-          if (user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+          if (await isAdminEmail(user.email ?? "")) {
             router.push("/admin");
           } else {
             setError("Access denied. You do not have admin privileges.");

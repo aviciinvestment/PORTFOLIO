@@ -11,8 +11,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Victory | High-End Portfolio",
-  description: "A stunning high-end portfolio for Victory",
+  title: "Victory Akunna",
+  description: "A stunning high-end portfolio for Victory Akunna",
+  icons: {
+    icon: "/sammy_3d.png",
+  },
 };
 
 export default function RootLayout({
