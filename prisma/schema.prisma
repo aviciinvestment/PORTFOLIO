@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  image       String?
+  tags        String[]
+  liveUrl     String?
+  repoUrl     String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String?
+  category  String   @default("frontend")
+  level     Int      @default(75)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Experience {
+  id          String   @id @default(cuid())
+  role        String
+  company     String
+  period      String
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteContent {
+  id                String   @id @default(cuid())
+  brand             String   @default("noah.")
+  greeting          String   @default("Hey I am")
+  heroName          String   @default("Sammy")
+  heroTitle         String   @default("Web Developer")
+  heroTagline       String   @default("I design websites using Figma and develop them to bring to live")
+  testimonialQuote  String   @default("Working with Sammy was so good, he is so professional and would work with him again")
+  testimonialName   String   @default("Angelina Jolie")
+  testimonialRole   String   @default("Business owner")
+  resumeUrl         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Social {
+  id        String   @id @default(cuid())
+  platform  String
+  url       String
+  icon      String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  quote     String
+  name      String
+  role      String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

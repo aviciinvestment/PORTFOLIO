@@ -1,0 +1,167 @@
+HOW TO DEPLOY THIS PORTFOLIO
+============================
+
+ARCHITECTURE (2 parts)
+----------------------
+1) CHATBOT -> Cloudflare Worker   (NVIDIA AI + Pinecone RAG only)
+   Folder:  worker/               (worker/src/index.ts, worker/wrangler.toml)
+   Endpoint exposed:
+     POST /chat   -> returns an NDJSON stream {r: reasoning} / {c: content}
+     GET  /health -> health check
+
+2) EVERYTHING ELSE -> Vercel (Next.js)
+   - Public site, Admin dashboard, Prisma/Neon DB, CRUD APIs, RAG sync
+   - /api/chat on Next just PROXIES the request to the Cloudflare Worker.
+     If CHAT_WORKER_URL is not set, Next falls back to running the chat
+     itself, so the site still works without the Worker.
+
+CODE LAYOUT
+-----------
+  shared/chat/core.ts   -> Chat logic shared by BOTH the Worker and Next.js
+  worker/               -> Cloudflare Worker (chatbot)
+  src/                  -> Next.js app (site, admin, db, all other APIs)
+  prisma/               -> Prisma schema + seed
+  .env                  -> LOCAL secrets (git-ignored, never commit it)
+
+REQUIREMENTS
+------------
+- Node.js 18+
+- An account at https://vercel.com  (for the site)
+- An account at https://dash.cloudflare.com  (for the chatbot Worker)
+- Neon Postgres DB  (DATABASE_URL)      - https://neon.tech
+- Pinecone index    (PINECONE_API_KEY)  - https://www.pinecone.io
+  (existing index: rag-systems, dimension 1024)
+- NVIDIA API keys   (NVIDIA_API_KEY, NVIDIA_EMBEDDING_API_KEY)
+  - https://build.nvidia.com
+- Firebase project (for Google admin sign-in) - https://console.firebase.google.com
+  (Firebase config is already hardcoded in src/lib/firebase.ts)
+
+====================================================================
+PART A - DEPLOY THE CLOUDFLARE WORKER (CHATBOT)
+====================================================================
+
+1. Install dependencies once:
+   npm install
+
+2. Create your local worker secrets file (git-ignored):
+   Copy worker/.dev.vars.example -> worker/.dev.vars  (create it if missing)
+   worker/.dev.vars:
+   ```
+   NVIDIA_API_KEY="your-nvidia-key"
+   NVIDIA_EMBEDDING_API_KEY="your-nvidia-embedding-key"
+   PINECONE_API_KEY="your-pinecone-key"
+   ```
+
+3. Test the worker locally:
+   npm run worker:dev
+   Then from another terminal:
+   - curl http://localhost:8787/health
+   - curl -X POST http://localhost:8787/chat \
+       -H "Content-Type: application/json" \
+       -d '{"messages":[{"role":"user","content":"Tell me about Victory"}]}'
+   You will see the NDJSON stream (reasoning + answer).
+
+4. Log in to Cloudflare:
+   npx wrangler login
+
+5. Add the SECRETS (do this once; they override nothing in wrangler.toml):
+   npx wrangler secret put NVIDIA_API_KEY          --config worker/wrangler.toml
+   npx wrangler secret put NVIDIA_EMBEDDING_API_KEY --config worker/wrangler.toml
+   npx wrangler secret put PINECONE_API_KEY         --config worker/wrangler.toml
+
+   (The non-secret values are already in worker/wrangler.toml: index name,
+    index host, NVIDIA URLs, chat model.)
+
+6. Deploy:
+   npm run worker:deploy
+   (same as: npx wrangler deploy --config worker/wrangler.toml)
+
+7. After deploy you get a URL like:
+   https://victory-chatbot.<your-subdomain>.workers.dev
+   Save this URL. You need it in Part B (step 1).
+
+8. (Optional but recommended) In the Cloudflare dashboard -> Workers &
+   Pages -> your worker -> Settings -> Domains & Routes, add a custom
+   domain or route so the URL is stable (e.g. chatbot.yourdomain.com).
+
+====================================================================
+PART B - DEPLOY THE NEXT.JS SITE TO VERCEL
+====================================================================
+
+1. Environment variables for Vercel (Project -> Settings -> Environment
+   Variables). Add these with "Production" (and Preview if desired):
+
+   DATABASE_URL              = your Neon Postgres connection string
+                               (postgresql://...neon.tech/neondb?sslmode=require)
+   NVIDIA_API_KEY            = your NVIDIA API key
+   NVIDIA_EMBEDDING_API_KEY  = your NVIDIA embedding key
+   PINECONE_API_KEY          = your Pinecone API key
+   NEXT_PUBLIC_ADMIN_EMAIL   = the email allowed to sign into /admin
+                               (e.g. victorychibuakunna@gmail.com)
+   CHAT_WORKER_URL           = https://victory-chatbot.<your-subdomain>.workers.dev
+                               (from Part A step 7. Optional - chat still
+                                works locally on Next without this)
+
+   NOTE: the Pinecone index name/host default to "rag-systems" and the
+   correct host URL in code, so you do NOT need extra envs unless you
+   change them:
+   PINECONE_INDEX_NAME (optional) = rag-systems
+   PINECONE_INDEX_HOST (optional) = https://rag-systems-x3bxlpw.svc.aped-4627-b74a.pinecone.io
+
+2. Push the code to a GitHub/GitLab repository (the .env and .next are
+   git-ignored - never commit secrets).
+
+3. Dashboard method:
+   - Go to https://vercel.com/new
+   - Import your repository
+   - Framework preset: "Next.js" (auto-detected)
+   - Add the environment variables from step 1
+   - Deploy. Vercel runs: npm install -> npm run build -> next start
+
+4. (or) CLI method:
+   npm i -g vercel
+   vercel login
+   vercel           # in the project root, links + deploys preview
+   vercel --prod    # production deploy
+   For env vars: vercel env add DATABASE_URL production  (repeat per var)
+
+5. After first deploy, run the DATABASE setup from the repo root
+   (do it locally, or use a one-off command on Vercel):
+   npx prisma db push        # creates tables from prisma/schema.prisma
+   npm run db:seed           # optional sample content
+
+6. Fill the site with content and build the RAG index:
+   - Open https://your-domain.com/admin and sign in with the Google
+     account that matches NEXT_PUBLIC_ADMIN_EMAIL.
+   - In the admin dashboard click "Sync RAG" so the chatbot can answer
+     from your projects/skills/experience. (This calls /api/admin/sync-rag
+     which writes vectors into Pinecone.)
+
+7. Firebase: so Google Sign-In works on your real domain, in Firebase
+   Console -> Authentication -> Settings -> Authorized domains, add:
+   - your-domain.vercel.app
+   - your-custom-domain.com
+   (Keep localhost enabled for local dev.)
+
+====================================================================
+VERIFY EVERYTHING
+====================================================================
+- Chatbot:   https://victory-chatbot.<your-subdomain>.workers.dev/health
+- Site chat: open the site, click the chat bubble, ask
+             "Tell me about Victory". The reply should show formatted
+             Markdown (bold, lists, etc.), not raw syntax.
+- Markdown question that is off-topic (e.g. "What is 2+2?") should be
+  politely declined.
+
+====================================================================
+COMMON ISSUES / NOTES
+====================================================================
+- If chat times out, the Worker's free plan limits requests to ~30s;
+  the paid plan allows ~100s per request. The model is set to high
+  reasoning effort, which can take a while. Lower "reasoning_effort"
+  to "low" in shared/chat/core.ts if responses are too slow.
+- DATABASE_URL on Vercel: keep sslmode=require in the connection string.
+- Never commit .env, worker/.dev.vars, or any API keys.
+- Pushing schema/seed changes locally:
+    npx prisma db push
+    npm run db:seed
