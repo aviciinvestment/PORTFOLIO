@@ -45,6 +45,7 @@ export async function generateEmbedding(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
@@ -127,6 +128,7 @@ export async function runChat(env: ChatEnv, messages: ChatMessage[]): Promise<Ch
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
@@ -154,8 +156,11 @@ export async function runChat(env: ChatEnv, messages: ChatMessage[]): Promise<Ch
 
   const message = data.choices?.[0]?.message;
 
+  const reasoning =
+    message?.reasoning_content || message?.reasoning || "";
+
   return {
-    reasoning: message?.reasoning_content || message?.reasoning || "",
-    content: message?.content || "",
+    reasoning,
+    content: message?.content || reasoning,
   };
 }
