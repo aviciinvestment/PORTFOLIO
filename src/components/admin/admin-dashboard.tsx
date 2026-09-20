@@ -640,11 +640,39 @@ function ProjectsTab({
   const [busy, setBusy] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Project | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const openEdit = (p: Project) => {
     setEditing(p);
     setEditId(p.id);
+    setUploadedImage(null);
     setShowForm(true);
+  };
+
+  const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Image upload failed");
+      const data = await res.json();
+      if (!data.url) throw new Error("No image URL returned");
+      setUploadedImage(data.url);
+      onNotify("Image uploaded");
+    } catch (err) {
+      onError(err);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
@@ -654,7 +682,7 @@ function ProjectsTab({
     const payload = {
       title: values.title,
       description: values.description,
-      image: values.image || null,
+      image: uploadedImage || values.image || null,
       tags: (values.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
       liveUrl: values.liveUrl || null,
       repoUrl: values.repoUrl || null,
@@ -719,6 +747,7 @@ function ProjectsTab({
           onClick={() => {
             setEditId(null);
             setEditing(null);
+            setUploadedImage(null);
             setShowForm((s) => !s);
           }}
           className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white transition-colors"
@@ -754,8 +783,34 @@ function ProjectsTab({
               className={inputCls}
             />
           </Field>
-          <Field label="Image path">
-            <input name="image" defaultValue={editing?.image ?? ""} placeholder="/projects/lumina.png" className={inputCls} />
+          <Field label="Image (upload or paste a path)">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <input
+                  name="image"
+                  defaultValue={editing?.image ?? ""}
+                  placeholder="Or paste a URL/path..."
+                  className={clsx(inputCls, "flex-1 min-w-0")}
+                />
+                <label className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl cursor-pointer text-sm font-medium transition-colors disabled:opacity-50">
+                  {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  {uploadingImage ? "Uploading..." : "Upload"}
+                  <input type="file" className="hidden" accept="image/*" onChange={uploadImage} />
+                </label>
+              </div>
+              {(uploadedImage || editing?.image) && (
+                <div className="flex items-center gap-3">
+                  <img
+                    src={uploadedImage || editing?.image || ""}
+                    alt="Project preview"
+                    className="w-16 h-16 rounded-lg object-cover border border-white/10 bg-white/5"
+                  />
+                  {uploadedImage && (
+                    <span className="text-xs text-emerald-300">New image added — will save with the project</span>
+                  )}
+                </div>
+              )}
+            </div>
           </Field>
           <Field label="Tags (comma separated)">
             <input name="tags" defaultValue={editing?.tags.join(", ") ?? ""} placeholder="Next.js, Tailwind" className={inputCls} />

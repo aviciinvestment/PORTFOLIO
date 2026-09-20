@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { HomeClient } from "@/components/home-client";
 import { SkillsSection } from "@/components/sections/skills-section";
+import { ProjectsSection } from "@/components/sections/projects-section";
 import { ExperienceSection } from "@/components/sections/experience-section";
 import { Footer } from "@/components/footer";
 
@@ -9,9 +10,13 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function Page() {
-  const [site, skills, experience, testimonials, socials] = await Promise.all([
+  const [site, skills, projects, experience, testimonials, socials] = await Promise.all([
     prisma.siteContent.findFirst(),
     prisma.skill.findMany({ orderBy: { order: "asc" } }),
+    prisma.project.findMany({
+      where: { published: true },
+      orderBy: { order: "asc" },
+    }),
     prisma.experience.findMany({ orderBy: { order: "asc" } }),
     prisma.testimonial.findMany({
       where: { active: true },
@@ -39,6 +44,7 @@ export default async function Page() {
         initialTestimonials={testimonials}
       />
       <SkillsSection initialSkills={skills} />
+      <ProjectsSection initialProjects={projects} />
       <ExperienceSection initialExperience={experience} />
       <Footer initialSocials={socials} />
     </main>

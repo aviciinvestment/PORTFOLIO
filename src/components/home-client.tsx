@@ -67,7 +67,7 @@ export function HomeClient({
   const [testimonialIndex, setTestimonialIndex] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const NAV_LINKS = ['Home', 'Skills', 'Experience', 'Connect']
+  const NAV_LINKS = ['Home', 'Skills', 'Projects', 'Experience', 'Connect']
 
   useEffect(() => {
     if (!menuOpen) return;
