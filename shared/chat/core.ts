@@ -119,7 +119,7 @@ export async function runChat(
 
   const hasLiveData = Boolean(opts?.additionalContext && opts.additionalContext.trim());
 
-  if (lastMessage && lastMessage.role === "user" && !hasLiveData) {
+  if (lastMessage && lastMessage.role === "user") {
     try {
       contextStr = await retrieveContext(env, lastMessage.content);
     } catch (err) {
