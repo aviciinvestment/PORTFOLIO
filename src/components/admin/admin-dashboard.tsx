@@ -646,7 +646,7 @@ function ProjectsTab({
   const openEdit = (p: Project) => {
     setEditing(p);
     setEditId(p.id);
-    setUploadedImage(null);
+    setUploadedImage(p.image);
     setShowForm(true);
   };
 
@@ -682,7 +682,7 @@ function ProjectsTab({
     const payload = {
       title: values.title,
       description: values.description,
-      image: uploadedImage || values.image || null,
+      image: uploadedImage || null,
       tags: (values.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
       liveUrl: values.liveUrl || null,
       repoUrl: values.repoUrl || null,
@@ -788,8 +788,9 @@ function ProjectsTab({
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <input
                   name="image"
-                  defaultValue={editing?.image ?? ""}
-                  placeholder="Or paste a URL/path..."
+                  value={uploadedImage?.startsWith("data:") ? "" : (uploadedImage || "")}
+                  onChange={(e) => setUploadedImage(e.target.value)}
+                  placeholder={uploadedImage?.startsWith("data:") ? "(Using uploaded image)" : "Or paste a URL/path..."}
                   className={clsx(inputCls, "flex-1 min-w-0")}
                 />
                 <label className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl cursor-pointer text-sm font-medium transition-colors disabled:opacity-50">
@@ -798,16 +799,19 @@ function ProjectsTab({
                   <input type="file" className="hidden" accept="image/*" onChange={uploadImage} />
                 </label>
               </div>
-              {(uploadedImage || editing?.image) && (
+              {uploadedImage && (
                 <div className="flex items-center gap-3">
                   <img
-                    src={uploadedImage || editing?.image || ""}
+                    src={uploadedImage}
                     alt="Project preview"
                     className="w-16 h-16 rounded-lg object-cover border border-white/10 bg-white/5"
                   />
-                  {uploadedImage && (
-                    <span className="text-xs text-emerald-300">New image added — will save with the project</span>
-                  )}
+                  <div className="flex flex-col gap-1 items-start">
+                    <span className="text-xs text-emerald-300">Image ready</span>
+                    <button type="button" onClick={() => setUploadedImage(null)} className="text-xs text-red-400 hover:text-red-300 transition-colors">
+                      Remove
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1454,9 +1458,9 @@ function SiteTab({
                 ) : field.key === "resumeUrl" ? (
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <input
-                      value={values.resumeUrl || ""}
+                      value={values.resumeUrl?.startsWith("data:") ? "" : (values.resumeUrl || "")}
                       onChange={setField("resumeUrl")}
-                      placeholder="Paste URL or upload file..."
+                      placeholder={values.resumeUrl?.startsWith("data:") ? "(Using uploaded resume)" : "Paste URL or upload file..."}
                       className={clsx(inputCls, "flex-1 min-w-0")}
                     />
                     <label className="shrink-0 flex items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl cursor-pointer text-sm font-medium transition-colors">
