@@ -1471,7 +1471,7 @@ function SiteTab({
                           
                           try {
                             setBusy(true);
-                            onNotify("Uploading resume to Cloudinary...");
+                            onNotify("Uploading resume...");
                             const formData = new FormData();
                             formData.append("file", file);
                             
@@ -1484,21 +1484,30 @@ function SiteTab({
                             
                             const data = await res.json();
                             const newUrl = data.url;
-                            
+                            const extracted = data.text ?? "";
+
                             // Automatically save the URL and extracted CV text
                             const payload: Record<string, string> = {};
                             for (const f of SITE_FIELDS) {
                               payload[f.key] = f.key === "resumeUrl" ? newUrl : (values[f.key] ?? "");
                             }
-                            payload.resumeText = data.text ?? "";
-                            
+                            if (extracted.trim()) {
+                              payload.resumeText = extracted;
+                            }
+
                             const saved = await apiFetch<SiteContent>("/api/admin/site-content", {
                               method: "PUT",
                               body: JSON.stringify(payload),
                             });
-                            
+
+                            const existingText = values.resumeText ?? "";
+                            const hasText = extracted.trim() || existingText.trim();
                             setValues({ ...DEFAULT_SITE_CONTENT, ...saved });
-                            onNotify("Resume uploaded and saved successfully!");
+                            onNotify(
+                              hasText
+                                ? "Resume uploaded and saved — chatbot will use it on the next message."
+                                : "Resume uploaded. No text was found (image-only PDF?), so CV text was kept as before."
+                            );
                           } catch (err) {
                             onError(err);
                           } finally {
