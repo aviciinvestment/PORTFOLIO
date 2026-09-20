@@ -554,6 +554,49 @@ function EmptyRow({ label }: { label: string }) {
   return <p className="py-6 text-sm text-white/30 text-center">{label}</p>;
 }
 
+const compressImage = (file: File, maxWidth: number = 1200): Promise<File> => {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith("image/")) {
+      return resolve(file); // Only compress images
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(file);
+        
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" }));
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.85
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
 /* ------------------------------ Shared UI ------------------------------ */
 
 function AddForm({
@@ -651,12 +694,13 @@ function ProjectsTab({
   };
 
   const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
 
     setUploadingImage(true);
     try {
+      file = await compressImage(file);
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch("/api/upload", {
