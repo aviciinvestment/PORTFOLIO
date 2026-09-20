@@ -18,12 +18,19 @@ const worker = {
     }
 
     let messages: ChatMessage[];
+    let additionalContext: string | undefined;
     try {
-      const body = (await request.json()) as { messages?: unknown };
+      const body = (await request.json()) as {
+        messages?: unknown;
+        context?: unknown;
+      };
       if (!Array.isArray(body.messages) || body.messages.length === 0) {
         throw new Error("invalid payload");
       }
       messages = body.messages as ChatMessage[];
+      if (typeof body.context === "string" && body.context.trim()) {
+        additionalContext = body.context;
+      }
     } catch {
       return Response.json({ error: "Messages array is required." }, { status: 400 });
     }
@@ -37,7 +44,9 @@ const worker = {
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         try {
-          const { reasoning, content } = await runChat(env, messages);
+          const { reasoning, content } = await runChat(env, messages, {
+            additionalContext,
+          });
 
           if (reasoning) {
             controller.enqueue(encoder.encode(encodeNdjson({ r: "\n\n" + reasoning })));

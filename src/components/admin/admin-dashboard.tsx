@@ -104,6 +104,8 @@ type SiteContent = {
   testimonialRole: string;
   resumeUrl: string | null;
   resumeText: string | null;
+  whatsappUrl: string | null;
+  contactEmail: string | null;
 };
 
 type Testimonial = {
@@ -1287,6 +1289,16 @@ const SITE_FIELDS: {
   { key: "testimonialName", label: "Legacy Testimonial name", hint: 'Deprecated: Use the new Testimonials tab instead.' },
   { key: "testimonialRole", label: "Legacy Testimonial role", hint: 'Deprecated: Use the new Testimonials tab instead.' },
   { key: "resumeUrl", label: "Resume Link (URL)", hint: 'e.g. Google Drive or Dropbox public link' },
+  {
+    key: "whatsappUrl",
+    label: "WhatsApp link",
+    hint: 'Hire Me button opens this chat. e.g. https://wa.me/2348012345678 or a chat.whatsapp.com link',
+  },
+  {
+    key: "contactEmail",
+    label: "Contact email",
+    hint: 'Gmail icon opens mailto to this address, e.g. victory@gmail.com',
+  },
 ];
 
 const DEFAULT_SITE_CONTENT: SiteContent = {
@@ -1302,6 +1314,8 @@ const DEFAULT_SITE_CONTENT: SiteContent = {
   testimonialRole: "Business owner",
   resumeUrl: null,
   resumeText: null,
+  whatsappUrl: null,
+  contactEmail: null,
 };
 
 function SiteTab({

@@ -17,7 +17,10 @@ export function buildChatEnv(): ChatEnv {
   };
 }
 
-export function localChatStream(messages: ChatMessage[]): ReadableStream<Uint8Array> {
+export function localChatStream(
+  messages: ChatMessage[],
+  additionalContext?: string
+): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
 
   return new ReadableStream<Uint8Array>({
@@ -29,7 +32,9 @@ export function localChatStream(messages: ChatMessage[]): ReadableStream<Uint8Ar
           controller.enqueue(encoder.encode(encodeNdjson({ r: "." })));
         }, 5000);
 
-        const { reasoning, content } = await runChat(buildChatEnv(), messages);
+        const { reasoning, content } = await runChat(buildChatEnv(), messages, {
+          additionalContext,
+        });
 
         if (keepAlive) {
           clearInterval(keepAlive);

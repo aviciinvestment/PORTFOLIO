@@ -93,16 +93,25 @@ export async function retrieveContext(env: ChatEnv, query: string): Promise<stri
     : "No specific context retrieved for this query.";
 }
 
-const SYSTEM_PROMPT = [
+export const SYSTEM_PROMPT = [
   "You are Victory's AI assistant on his portfolio website. You are helpful, concise, and friendly.",
-  "Answer questions about Victory using ONLY the context provided below.",
+  "Answer questions about Victory using ONLY the provided context.",
+  "When the MOST RECENT SITE DATA section is present, it is straight from Victory's live database and is authoritative - prefer it over any other context.",
   "Format your answer as clean Markdown: short paragraphs, bullet lists, **bold** for key terms, and headings only when they help.",
   "If the user asks something NOT related to the context or Victory's portfolio, politely decline to answer.",
   "",
   "Context about Victory:",
 ].join("\n");
 
-export async function runChat(env: ChatEnv, messages: ChatMessage[]): Promise<ChatResult> {
+export interface RunChatOptions {
+  additionalContext?: string;
+}
+
+export async function runChat(
+  env: ChatEnv,
+  messages: ChatMessage[],
+  opts?: RunChatOptions
+): Promise<ChatResult> {
   const lastMessage = messages[messages.length - 1];
   let contextStr = "";
 
@@ -114,8 +123,23 @@ export async function runChat(env: ChatEnv, messages: ChatMessage[]): Promise<Ch
     }
   }
 
+  const sections: string[] = [];
+  if (opts?.additionalContext && opts.additionalContext.trim()) {
+    sections.push(
+      "MOST RECENT SITE DATA (live from Victory's database - authoritative, prefer this over older context):\n" +
+        opts.additionalContext.trim()
+    );
+  }
+  if (contextStr) {
+    sections.push(contextStr);
+  }
+
+  const systemContent = sections.length
+    ? `${SYSTEM_PROMPT}\n\n${sections.join("\n\n")}`
+    : SYSTEM_PROMPT;
+
   const apiMessages: ChatMessage[] = [
-    { role: "system", content: `${SYSTEM_PROMPT}\n${contextStr}` },
+    { role: "system", content: systemContent },
     ...messages,
   ];
 

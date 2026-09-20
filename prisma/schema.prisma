@@ -63,6 +63,8 @@ model SiteContent {
   testimonialRole   String   @default("Business owner")
   resumeUrl         String?
   resumeText        String?
+  whatsappUrl       String?
+  contactEmail      String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

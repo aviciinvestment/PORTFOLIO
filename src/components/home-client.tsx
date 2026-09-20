@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { Download, Mail, Quote } from "lucide-react"
+import { Download, Mail, Menu, Quote, X } from "lucide-react"
 import { PhysicsSkills } from "@/components/ui/physics-skills"
 
 type SiteContent = {
@@ -13,6 +13,8 @@ type SiteContent = {
   heroTitle: string
   heroTagline: string
   resumeUrl: string | null
+  whatsappUrl: string | null
+  contactEmail: string | null
 }
 
 type Testimonial = {
@@ -30,6 +32,8 @@ const FALLBACK_CONTENT: SiteContent = {
   heroTitle: "Web Developer",
   heroTagline: "I design websites using Figma and develop them to bring to live",
   resumeUrl: null,
+  whatsappUrl: null,
+  contactEmail: null,
 }
 
 const FALLBACK_TESTIMONIALS: Testimonial[] = [
@@ -61,8 +65,23 @@ export function HomeClient({
     initialTestimonials.length > 0 ? initialTestimonials : FALLBACK_TESTIMONIALS
   )
   const [testimonialIndex, setTestimonialIndex] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const NAV_LINKS = ['Home', 'Skills', 'Experience', 'Connect']
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen])
 
   useEffect(() => {
     if (testimonials.length <= 1) return;
@@ -86,7 +105,7 @@ export function HomeClient({
         >
           <div className="text-2xl font-bold tracking-tight min-w-0 truncate">{site?.brand ?? FALLBACK_CONTENT.brand}</div>
           
-          <nav className="order-last md:order-none w-full md:w-auto flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-2.5 backdrop-blur-md overflow-x-auto">
+          <nav className="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-2.5 backdrop-blur-md overflow-x-auto">
             {NAV_LINKS.map((item, i) => (
               <a 
                 key={item} 
@@ -100,18 +119,118 @@ export function HomeClient({
           
           <div className="flex items-center gap-3 shrink-0">
             {site?.resumeUrl ? (
-              <a href={site.resumeUrl} download="resume.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-full px-4 md:px-6 py-3 text-sm font-medium backdrop-blur-md">
+              <a href={site.resumeUrl} download="resume.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-full px-4 md:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium backdrop-blur-md">
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Download Resume</span>
+                <span>Download Resume</span>
               </a>
             ) : (
-              <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-full px-4 md:px-6 py-3 text-sm font-medium backdrop-blur-md opacity-50 cursor-not-allowed" title="No resume available">
+              <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-full px-4 md:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium backdrop-blur-md opacity-50 cursor-not-allowed" title="No resume available">
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Download Resume</span>
+                <span>Download Resume</span>
               </button>
             )}
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="md:hidden flex items-center justify-center p-2.5 sm:p-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md text-white/80 hover:text-white transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
           </div>
         </motion.header>
+
+        {/* Mobile slide-in sidebar */}
+        <AnimatePresence>
+          {menuOpen && (
+            <>
+              <motion.div
+                key="nav-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMenuOpen(false)}
+                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+              />
+              <motion.aside
+                key="nav-drawer"
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
+                className="fixed top-0 left-0 bottom-0 z-50 w-[300px] max-w-[85vw] md:hidden flex flex-col bg-[#0a0604]/85 backdrop-blur-2xl border-r border-white/10 shadow-2xl"
+              >
+                <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-white/10">
+                  <span className="text-2xl font-bold tracking-tight truncate">{site?.brand ?? FALLBACK_CONTENT.brand}</span>
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    className="shrink-0 p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white transition-colors"
+                    aria-label="Close menu"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <nav className="flex flex-col gap-1 px-4 py-6">
+                  {NAV_LINKS.map((item, i) => (
+                    <a
+                      key={item}
+                      href={`#${item.toLowerCase()}`}
+                      onClick={() => setMenuOpen(false)}
+                      className={`px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                        i === 0 ? 'text-[#ff5c00]' : 'text-white/70 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {item}
+                    </a>
+                  ))}
+                </nav>
+
+                <div className="mt-auto px-4 pb-8 grid gap-3">
+                  {site?.resumeUrl ? (
+                    <a
+                      href={site.resumeUrl}
+                      download="resume.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 border border-white/15 rounded-full px-5 py-3 text-sm font-medium"
+                    >
+                      <Download className="w-4 h-4" /> Download Resume
+                    </a>
+                  ) : (
+                    <button
+                      disabled
+                      className="flex items-center justify-center gap-2 bg-white/5 border border-white/10 rounded-full px-5 py-3 text-sm font-medium opacity-50 cursor-not-allowed"
+                    >
+                      <Download className="w-4 h-4" /> Download Resume
+                    </button>
+                  )}
+                  {site?.whatsappUrl && (
+                    <a
+                      href={site.whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white rounded-full px-5 py-3 text-sm font-medium"
+                    >
+                      Hire Me
+                    </a>
+                  )}
+                  {site?.contactEmail && (
+                    <a
+                      href={`mailto:${site.contactEmail}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-5 py-3 text-sm font-medium text-white/80"
+                    >
+                      <Mail className="w-4 h-4" /> Email Me
+                    </a>
+                  )}
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Hero Section */}
         <div className="flex-1 flex flex-col lg:flex-row items-center mt-8 lg:mt-0 gap-10 lg:gap-0">
@@ -139,20 +258,48 @@ export function HomeClient({
             </div>
 
             <div className="flex items-center justify-center lg:justify-start gap-4 pt-2 md:pt-4">
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-medium tracking-wide shadow-[0_0_20px_rgba(255,92,0,0.4)] transition-all"
-              >
-                Hire Me
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-white/5 hover:bg-white/10 border border-white/10 p-3 md:p-4 rounded-full backdrop-blur-md transition-all"
-              >
-                <Mail className="w-5 h-5 text-white/80" />
-              </motion.button>
+              {site?.whatsappUrl ? (
+                <motion.a
+                  href={site.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-medium tracking-wide shadow-[0_0_20px_rgba(255,92,0,0.4)] transition-all"
+                >
+                  Hire Me
+                </motion.a>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled
+                  className="bg-[#ff5c00] text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-medium tracking-wide shadow-[0_0_20px_rgba(255,92,0,0.4)] opacity-50 cursor-not-allowed"
+                >
+                  Hire Me
+                </motion.button>
+              )}
+              {site?.contactEmail ? (
+                <motion.a
+                  href={`mailto:${site.contactEmail}`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-white/5 hover:bg-white/10 border border-white/10 p-3 md:p-4 rounded-full backdrop-blur-md transition-all"
+                  aria-label="Send me a message on Gmail"
+                >
+                  <Mail className="w-5 h-5 text-white/80" />
+                </motion.a>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled
+                  className="bg-white/5 border border-white/10 p-3 md:p-4 rounded-full backdrop-blur-md opacity-50 cursor-not-allowed"
+                  aria-label="Send me a message"
+                >
+                  <Mail className="w-5 h-5 text-white/80" />
+                </motion.button>
+              )}
             </div>
 
             {/* Testimonial Glass Card */}
