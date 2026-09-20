@@ -274,8 +274,8 @@ export function AdminDashboard() {
 
   return (
     <main className="min-h-screen bg-[#0a0604] text-[#f8fafc] relative overflow-x-hidden font-sans">
-      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#d9480f]/15 rounded-full blur-[120px] pointer-events-none translate-x-1/4 -translate-y-1/4" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#d9480f]/10 rounded-full blur-[100px] pointer-events-none -translate-x-1/4 translate-y-1/4" />
+      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#d9480f]/15 rounded-full blur-[120px] pointer-events-none translate-x-1/4 -translate-y-1/4 hidden md:block" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#d9480f]/10 rounded-full blur-[100px] pointer-events-none -translate-x-1/4 translate-y-1/4 hidden md:block" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-6 md:py-8 relative z-10 w-full">
         {/* Header */}
@@ -708,7 +708,7 @@ function ProjectsTab({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h2 className="text-xl font-semibold">Projects</h2>
           <p className="text-sm text-white/50">{projects.length} total</p>
@@ -892,7 +892,7 @@ function SkillsTab({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h2 className="text-xl font-semibold">Skills</h2>
           <p className="text-sm text-white/50">{skills.length} total</p>
@@ -1056,7 +1056,7 @@ function ExperienceTab({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h2 className="text-xl font-semibold">Experience</h2>
           <p className="text-sm text-white/50">{experiences.length} total</p>
@@ -1553,7 +1553,7 @@ function SocialsTab({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h2 className="text-xl font-semibold">Socials</h2>
           <p className="text-sm text-white/50">{socials.length} total links</p>
@@ -1738,7 +1738,7 @@ function TestimonialsTab({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h2 className="text-xl font-semibold">Testimonials</h2>
           <p className="text-sm text-white/50">{testimonials.length} total remarks</p>

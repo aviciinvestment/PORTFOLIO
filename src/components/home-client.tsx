@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { Download, Mail, Menu, Quote, X } from "lucide-react"
+import { Download, Mail, Quote } from "lucide-react"
 import { PhysicsSkills } from "@/components/ui/physics-skills"
 
 type SiteContent = {
@@ -61,7 +61,6 @@ export function HomeClient({
     initialTestimonials.length > 0 ? initialTestimonials : FALLBACK_TESTIMONIALS
   )
   const [testimonialIndex, setTestimonialIndex] = useState(0)
-  const [menuOpen, setMenuOpen] = useState(false)
 
   const NAV_LINKS = ['Home', 'Skills', 'Experience', 'Connect']
 
@@ -83,24 +82,23 @@ export function HomeClient({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex justify-between items-center w-full"
+          className="flex flex-wrap items-center justify-between gap-3 w-full"
         >
           <div className="text-2xl font-bold tracking-tight min-w-0 truncate">{site?.brand ?? FALLBACK_CONTENT.brand}</div>
           
-          <nav className="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-6 py-3 backdrop-blur-md">
+          <nav className="order-last md:order-none w-full md:w-auto flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-2.5 backdrop-blur-md overflow-x-auto">
             {NAV_LINKS.map((item, i) => (
               <a 
                 key={item} 
                 href={`#${item.toLowerCase()}`} 
-                onClick={() => setMenuOpen(false)}
-                className={`px-4 text-sm font-medium transition-colors hover:text-white ${i === 0 ? 'text-[#ff5c00]' : 'text-white/60'}`}
+                className={`whitespace-nowrap px-3 md:px-4 text-sm font-medium transition-colors hover:text-white ${i === 0 ? 'text-[#ff5c00]' : 'text-white/60'}`}
               >
                 {item}
               </a>
             ))}
           </nav>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {site?.resumeUrl ? (
               <a href={site.resumeUrl} download="resume.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-full px-4 md:px-6 py-3 text-sm font-medium backdrop-blur-md">
                 <Download className="w-4 h-4" />
@@ -112,42 +110,8 @@ export function HomeClient({
                 <span className="hidden sm:inline">Download Resume</span>
               </button>
             )}
-
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMenuOpen((s) => !s)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              className="md:hidden p-3 rounded-full bg-white/5 border border-white/10 text-white/80 hover:text-white transition-colors"
-            >
-              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
           </div>
         </motion.header>
-
-        {/* Mobile dropdown menu */}
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.nav
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden mt-4 bg-white/5 border border-white/10 rounded-2xl p-3 backdrop-blur-md"
-            >
-              {NAV_LINKS.map((item, i) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  onClick={() => setMenuOpen(false)}
-                  className={`block px-4 py-3 rounded-xl text-sm font-medium transition-colors hover:bg-white/10 ${i === 0 ? 'text-[#ff5c00]' : 'text-white/70'}`}
-                >
-                  {item}
-                </a>
-              ))}
-            </motion.nav>
-          )}
-        </AnimatePresence>
 
         {/* Hero Section */}
         <div className="flex-1 flex flex-col lg:flex-row items-center mt-8 lg:mt-0 gap-10 lg:gap-0">
