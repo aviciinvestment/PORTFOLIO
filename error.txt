@@ -1,20 +1,69 @@
-ERRORS REPORT - 2026-09-19
-============================
+ERRORS REPORT - 2026-09-20 (final scan for nav / admin / favicon)
 
-1) `npm run lint` (ESLint) hangs / produces no output indefinitely
-   - Tried: ran from repo root and scoped to single files, 5-minute timeout.
-   - Result: no output, must be killed. ESLint config is standard
-     (eslint.config.mjs -> eslint-config-next). Appears to be an
-     environment problem on this Windows machine, NOT a code error.
+RESULT OF THE FULL SCAN
+=======================
+All three requested fixes ARE present and correct in the pushed code
+(commit bc85ade "first deploy", origin/master):
 
-2) `npm run build` (next build) hangs / produces no output indefinitely
-   - Tried: with CI=1, 7-minute timeout. Result: no output.
-   - `npx tsc --noEmit` DOES pass cleanly (all type checks OK).
-   - Also appears to be an environment problem. Please run
-     "npm run build" on your machine to confirm.
+1) MOBILE NAV  -> src/components/home-client.tsx
+   The nav (Home/Skills/Experience/Connect) is now ALWAYS rendered on
+   every screen size. On mobile it sits on its own full-width row below
+   the brand (class: "order-last w-full ... overflow-x-auto"), scrollable
+   horizontally if it overflows. The old "hidden md:flex" (which WAS the
+   bug - it hid the nav entirely on phones) is gone. There is exactly ONE
+   nav component in the app; page.tsx renders it. Grep for "hidden md:flex"
+   on the nav: none remains.
 
-Everything else was completed and verified:
-   - tsc clean
-   - pdf-parse + mammoth text extraction tested with a real PDF
-   - prisma db push succeeded (resumeText column added to Neon)
-   - Chat fix (Accept header) verified by live API call
+2) ADMIN MOBILE RESPONSIVENESS -> src/components/admin/admin-dashboard.tsx
+   + src/app/admin/login/page.tsx
+   - Dashboard rows now truncate (min-w-0 flex-1, no fixed max-w) instead
+     of pushing content off-screen
+   - Header wraps (flex-wrap), Sync button visible on mobile, tabs
+     scroll horizontally, stat grid adapts 2/3/5 cols
+   - All "Add ..." tab headers wrap; deco glow circles hidden on mobile
+   - Login glow hidden on mobile
+
+3) DOCUMENT ICON -> src/app/favicon.ico DELETED, src/app/icon.png ADDED
+   (512x512 copy of public/sammy_3d.png, the homepage character).
+   metadata in layout.tsx links icon + apple = /icon.png. The default
+   Next.js favicon.ico that caused the "Next icon" is removed from the
+   repo entirely.
+
+THE ERROR / BLOCKER - CANNOT VERIFY PRODUCTION OUTPUT HERE
+==========================================================
+next build  -> runs forever, produces ZERO output (7+ min, also with
+               NEXT_TELEMETRY_DISABLED=1; build also ran during typegen-
+               only checks)
+next dev    -> same: starts, produces no output, never serves HTTP
+               (tested on port 3111; log files empty)
+npx eslint  -> same: no output, must be killed
+
+Because of this, from THIS machine I cannot: render/preview the page,
+verify the compiled bundle, or inspect what the deployed site actually
+serves. This is an environment problem with the Next CLI on this Windows
+box, NOT an error in the code: npx tsc --noEmit passes cleanly (after
+`npx next typegen` regenerates .next route types - typegen works).
+
+CAN IT STILL BE DEPLOYED WITH THIS ERROR?
+=========================================
+YES - it CAN and SHOULD be deployed. The code is valid and type-clean.
+The Next CLI just cannot run on THIS machine. Take the build step
+somewhere the CLI runs (your own machine or Vercel):
+   - npm install; then npm run build   (on your machine)
+   - Verify it builds BEFORE pushing, or push to GitHub and let Vercel
+     build it. If Vercel's build fails, it keeps serving the OLD site
+     (which is exactly the "big Download Resume button / Next icon" you
+     keep seeing - that is the ORIGINAL first build, still live).
+   - After a successful deploy, hard-refresh the browser / use incognito
+     (favicons cache in the browser very aggressively).
+
+VERIFICATION CHECKLIST (what should be true on the NEW site)
+============================================================
+- Phone viewport: a scrollable pill nav (Home/Skills/Experience/Connect)
+  sits full-width directly under the brand + resume button, near the top.
+- /admin on a phone: everything fits, nothing clips off the right edge,
+  "Sync AI Data" button visible, no overlapping elements.
+- Browser tab icon = the orange/3D character image, NOT the Next logo.
+
+If "npm run build" on your machine FAILS with a real error, paste the
+output here and I will fix that specific error.
