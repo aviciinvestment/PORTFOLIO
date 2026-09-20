@@ -96,7 +96,9 @@ export async function retrieveContext(env: ChatEnv, query: string): Promise<stri
 export const SYSTEM_PROMPT = [
   "You are Victory's AI assistant on his portfolio website. You are helpful, concise, and friendly.",
   "Answer questions about Victory using ONLY the provided context.",
-  "When the MOST RECENT SITE DATA section is present, it is straight from Victory's live database and is authoritative - prefer it over any other context.",
+  "The MOST RECENT SITE DATA block at the end is Victory's LIVE current information from his own database. It is authoritative and ALWAYS wins over anything else.",
+  "When asked about his CV, resume, education, work history, skills, contact info, or anything in the resume, answer STRICTLY from the 'Victory's CV/resume' text in that block - never invent roles, companies, dates, skills, or details.",
+  "If the CV text does not contain the answer, say it is not listed in his CV, and do not guess.",
   "Format your answer as clean Markdown: short paragraphs, bullet lists, **bold** for key terms, and headings only when they help.",
   "If the user asks something NOT related to the context or Victory's portfolio, politely decline to answer.",
   "",
@@ -115,7 +117,9 @@ export async function runChat(
   const lastMessage = messages[messages.length - 1];
   let contextStr = "";
 
-  if (lastMessage && lastMessage.role === "user") {
+  const hasLiveData = Boolean(opts?.additionalContext && opts.additionalContext.trim());
+
+  if (lastMessage && lastMessage.role === "user" && !hasLiveData) {
     try {
       contextStr = await retrieveContext(env, lastMessage.content);
     } catch (err) {
@@ -123,15 +127,17 @@ export async function runChat(
     }
   }
 
+  // Live DB data is authoritative, so place the retrieved (possibly stale)
+  // Pinecone context FIRST and the live data LAST where it is most salient.
   const sections: string[] = [];
-  if (opts?.additionalContext && opts.additionalContext.trim()) {
-    sections.push(
-      "MOST RECENT SITE DATA (live from Victory's database - authoritative, prefer this over older context):\n" +
-        opts.additionalContext.trim()
-    );
-  }
   if (contextStr) {
     sections.push(contextStr);
+  }
+  if (hasLiveData) {
+    sections.push(
+      "MOST RECENT SITE DATA (Victory's LIVE database - authoritative, ALWAYS wins over any older information):\n" +
+        (opts?.additionalContext as string).trim()
+    );
   }
 
   const systemContent = sections.length
