@@ -85,7 +85,7 @@ export function HomeClient({
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="flex justify-between items-center w-full"
         >
-          <div className="text-2xl font-bold tracking-tight">{site?.brand ?? FALLBACK_CONTENT.brand}</div>
+          <div className="text-2xl font-bold tracking-tight min-w-0 truncate">{site?.brand ?? FALLBACK_CONTENT.brand}</div>
           
           <nav className="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-6 py-3 backdrop-blur-md">
             {NAV_LINKS.map((item, i) => (

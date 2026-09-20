@@ -23,7 +23,7 @@ export interface ChatResult {
 
 export const DEFAULT_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 export const DEFAULT_EMBEDDING_URL = "https://integrate.api.nvidia.com/v1/embeddings";
-export const DEFAULT_CHAT_MODEL = "deepseek-ai/deepseek-v4-flash-0731";
+export const DEFAULT_CHAT_MODEL = "openai/gpt-oss-20b";
 export const DEFAULT_EMBEDDING_MODEL = "nvidia/nemotron-3-embed-1b";
 export const DEFAULT_PINECONE_INDEX = "rag-systems";
 export const DEFAULT_PINECONE_HOST = "https://rag-systems-x3bxlpw.svc.aped-4627-b74a.pinecone.io";
@@ -134,14 +134,9 @@ export async function runChat(env: ChatEnv, messages: ChatMessage[]): Promise<Ch
     body: JSON.stringify({
       model: env.CHAT_MODEL ?? DEFAULT_CHAT_MODEL,
       messages: apiMessages,
-      temperature: 1,
-      top_p: 0.95,
-      max_tokens: 16384,
+      temperature: 0.7,
+      max_tokens: 1024,
       stream: false,
-      chat_template_kwargs: {
-        thinking: true,
-        reasoning_effort: "high",
-      },
     }),
   });
 

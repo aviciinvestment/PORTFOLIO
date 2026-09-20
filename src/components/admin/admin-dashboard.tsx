@@ -452,15 +452,15 @@ function DashboardTab({
         <Panel title="Recent Projects" actionLabel="View all" onAction={() => onNavigate("projects")}>
           {data.projects.slice(0, 5).map((p) => (
             <div key={p.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-white/5 last:border-0">
-              <div>
-                <p className="text-sm font-medium">{p.title}</p>
-                <p className="text-xs text-white/40 text-ellipsis overflow-hidden whitespace-nowrap max-w-[220px]">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium truncate">{p.title}</p>
+                <p className="text-xs text-white/40 truncate">
                   {p.description}
                 </p>
               </div>
               <span
                 className={clsx(
-                  "text-[10px] px-2 py-1 rounded-full",
+                  "text-[10px] px-2 py-1 rounded-full shrink-0",
                   p.published
                     ? "bg-emerald-500/15 text-emerald-300"
                     : "bg-white/10 text-white/40"
@@ -476,16 +476,16 @@ function DashboardTab({
         <Panel title="Latest Messages" actionLabel="View all" onAction={() => onNavigate("messages")}>
           {data.messages.slice(0, 5).map((m) => (
             <div key={m.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-white/5 last:border-0">
-              <div>
-                <p className="text-sm font-medium">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium truncate">
                   {m.name}
                   <span className="text-white/40 font-normal"> · {m.email}</span>
                 </p>
-                <p className="text-xs text-white/40 text-ellipsis overflow-hidden whitespace-nowrap max-w-[240px]">
+                <p className="text-xs text-white/40 truncate">
                   {m.message}
                 </p>
               </div>
-              {!m.read && <span className="w-2 h-2 rounded-full bg-[#ff5c00]" />}
+              {!m.read && <span className="w-2 h-2 rounded-full bg-[#ff5c00] shrink-0" />}
             </div>
           ))}
           {data.messages.length === 0 && <EmptyRow label="No messages yet" />}
@@ -779,7 +779,7 @@ function ProjectsTab({
           >
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{p.title}</p>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span
                   className={clsx(
                     "text-[10px] px-2 py-0.5 rounded-full",
@@ -1106,12 +1106,12 @@ function ExperienceTab({
       <div className="space-y-4">
         {experiences.map((x) => (
           <div key={x.id} className="glass-panel rounded-2xl p-5 flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <h3 className="font-medium">{x.role}</h3>
               <p className="text-sm text-white/60">{x.company}</p>
               <p className="text-xs text-[#ff5c00] mt-1">{x.period}</p>
               {x.description && (
-                <p className="text-sm text-white/50 mt-2">{x.description}</p>
+                <p className="text-sm text-white/50 mt-2 break-words">{x.description}</p>
               )}
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -1388,9 +1388,9 @@ function SiteTab({
                       value={values.resumeUrl || ""}
                       onChange={setField("resumeUrl")}
                       placeholder="Paste URL or upload file..."
-                      className={clsx(inputCls, "flex-1")}
+                      className={clsx(inputCls, "flex-1 min-w-0")}
                     />
-                    <label className="flex items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl cursor-pointer text-sm font-medium transition-colors">
+                    <label className="shrink-0 flex items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl cursor-pointer text-sm font-medium transition-colors">
                       Upload
                       <input
                         type="file"
@@ -1607,7 +1607,7 @@ function SocialsTab({
           >
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{s.platform}</p>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span
                   className={clsx(
                     "text-[10px] px-2 py-0.5 rounded-full",
@@ -1794,7 +1794,7 @@ function TestimonialsTab({
           >
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{t.name}</p>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span
                   className={clsx(
                     "text-[10px] px-2 py-0.5 rounded-full",

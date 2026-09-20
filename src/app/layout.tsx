@@ -14,7 +14,6 @@ export const metadata: Metadata = {
   title: "victory akunna",
   description: "Victory Akunna — high-end portfolio",
   icons: {
-    icon: "/sammy_3d.png",
     apple: "/sammy_3d.png",
   },
 };
