@@ -19,6 +19,13 @@ async function buildLiveContext(): Promise<string> {
     const parts: string[] = [];
 
     if (site) {
+      // Note: site.resumeUrl is a large base64 data URL - NEVER include it in
+      // chat context. It floods the token budget and hides the CV text.
+      if (site.resumeText && site.resumeText.trim()) {
+        parts.push(
+          `Victory's CV/resume:\n${site.resumeText.trim().slice(0, 16000)}`
+        );
+      }
       parts.push(
         `Name: ${site.heroName}.\nRole: ${site.heroTitle}.\nTagline: ${site.heroTagline}.\nGreeting: ${site.greeting}.\nBrand: ${site.brand}.`
       );
@@ -29,13 +36,6 @@ async function buildLiveContext(): Promise<string> {
       }
       if (site.contactEmail) parts.push(`Contact email: ${site.contactEmail}.`);
       if (site.whatsappUrl) parts.push(`WhatsApp: ${site.whatsappUrl}.`);
-      if (site.resumeUrl) parts.push(`Resume link: ${site.resumeUrl}.`);
-
-      if (site.resumeText && site.resumeText.trim()) {
-        parts.push(
-          `Victory's CV/resume:\n${site.resumeText.trim().slice(0, 12000)}`
-        );
-      }
     }
 
     if (skills.length > 0) {
