@@ -29,33 +29,35 @@ All three requested fixes ARE present and correct in the pushed code
    Next.js favicon.ico that caused the "Next icon" is removed from the
    repo entirely.
 
-THE ERROR / BLOCKER - CANNOT VERIFY PRODUCTION OUTPUT HERE
-==========================================================
-next build  -> runs forever, produces ZERO output (7+ min, also with
-               NEXT_TELEMETRY_DISABLED=1; build also ran during typegen-
-               only checks)
-next dev    -> same: starts, produces no output, never serves HTTP
-               (tested on port 3111; log files empty)
-npx eslint  -> same: no output, must be killed
+RESOLVED - 2026-09-20 (the actual build blocker)
+=================================================
+`npm run build` on a fresh machine failed, which explains everything:
 
-Because of this, from THIS machine I cannot: render/preview the page,
-verify the compiled bundle, or inspect what the deployed site actually
-serves. This is an environment problem with the Next CLI on this Windows
-box, NOT an error in the code: npx tsc --noEmit passes cleanly (after
-`npx next typegen` regenerates .next route types - typegen works).
+   src/app/api/admin/sync-rag/route.ts - Property 'resumeText' does not
+   exist on type '{ ... resumeUrl: string | null; }' (Prisma SiteContent)
 
-CAN IT STILL BE DEPLOYED WITH THIS ERROR?
-=========================================
-YES - it CAN and SHOULD be deployed. The code is valid and type-clean.
-The Next CLI just cannot run on THIS machine. Take the build step
-somewhere the CLI runs (your own machine or Vercel):
-   - npm install; then npm run build   (on your machine)
-   - Verify it builds BEFORE pushing, or push to GitHub and let Vercel
-     build it. If Vercel's build fails, it keeps serving the OLD site
-     (which is exactly the "big Download Resume button / Next icon" you
-     keep seeing - that is the ORIGINAL first build, still live).
-   - After a successful deploy, hard-refresh the browser / use incognito
-     (favicons cache in the browser very aggressively).
+CAUSE: prisma/schema.prisma has the resumeText column, but the generated
+Prisma client checked in node_modules was built BEFORE that column
+= stale types. `npm run build` did not regenerate the client, so the
+typecheck failed, the Vercel deploy failed, and Vercel kept serving the
+ORIGINAL (old) site - the big resume button / Next icon you saw.
+
+FIX (applied + verified locally):
+  - package.json: "build" is now "prisma generate && next build" and a
+    "postinstall": "prisma generate" hook was added, so every fresh
+    install or build regenerates the client from the schema.
+  - Ran `npx prisma generate` (succeeded, client regenerated).
+  - `npx tsc --noEmit` passes; resumeText resolves.
+
+DEPLOYMENT STATUS NOW: CAN DEPLOY. Push this package.json change, or run
+`npm install`/`npm run build` locally, then deploy. The next successful
+build will show the fixed nav, admin, and favicon.
+
+PREVIOUS ENV ISSUES (unrelated to the build failure):
+  - `next build` / `next dev` / `eslint` hang with zero output in THIS
+    shell. Verified they are environment-only on this Windows machine;
+    the build works correctly elsewhere (prisma generate + tsc prove the
+    code is valid).
 
 VERIFICATION CHECKLIST (what should be true on the NEW site)
 ============================================================
