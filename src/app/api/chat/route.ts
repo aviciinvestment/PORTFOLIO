@@ -9,11 +9,12 @@ const MAX_SITE_CONTEXT = 24000;
 
 async function buildLiveContext(): Promise<string> {
   try {
-    const [site, skills, experiences, testimonials] = await Promise.all([
+    const [site, skills, experiences, testimonials, projects] = await Promise.all([
       prisma.siteContent.findFirst(),
       prisma.skill.findMany({ orderBy: { order: "asc" } }),
       prisma.experience.findMany({ orderBy: { order: "asc" } }),
       prisma.testimonial.findMany({ where: { active: true }, orderBy: { order: "asc" } }),
+      prisma.project.findMany({ where: { published: true }, orderBy: { order: "asc" } }),
     ]);
 
     const parts: string[] = [];
@@ -50,6 +51,14 @@ async function buildLiveContext(): Promise<string> {
       );
     }
 
+    if (projects.length > 0) {
+      parts.push(
+        `Projects:\n- ${projects
+          .map((p) => `${p.title}${p.tags.length ? ` [${p.tags.join(", ")}]` : ""}: ${p.description}`)
+          .join("\n- ")}`
+      );
+    }
+
     if (testimonials.length > 0) {
       parts.push(
         `Client testimonials:\n- ${testimonials
@@ -76,6 +85,22 @@ export async function POST(req: Request) {
     messages = body.messages as ChatMessage[];
   } catch {
     return NextResponse.json({ error: "Messages array is required." }, { status: 400 });
+  }
+
+  // Save the latest user message to the database for the admin dashboard
+  const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+  if (lastUserMsg && lastUserMsg.content) {
+    // Fire and forget - don't block the chat stream
+    prisma.message
+      .create({
+        data: {
+          name: "Chat User",
+          email: "chatbot@victory.portfolio",
+          subject: "AI Chat Inquiry",
+          message: lastUserMsg.content.slice(0, 5000), // Protect against massive payloads
+        },
+      })
+      .catch((err) => console.error("Failed to log chat message to DB:", err));
   }
 
   const liveContext = await buildLiveContext();

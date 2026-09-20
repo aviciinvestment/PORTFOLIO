@@ -584,18 +584,18 @@ function AddForm({
         </button>
       </div>
       <div className="grid md:grid-cols-2 gap-4">{children}</div>
-      <div className="flex justify-end gap-3 mt-6">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-full text-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+          className="w-full sm:w-auto px-4 py-2 rounded-full text-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={busy}
-          className="flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white transition-colors disabled:opacity-50"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-medium bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white transition-colors disabled:opacity-50"
         >
           {busy && <Loader2 className="w-4 h-4 animate-spin" />}
           Save
@@ -785,7 +785,7 @@ function ProjectsTab({
           </Field>
           <Field label="Image (upload or paste a path)">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <input
                   name="image"
                   defaultValue={editing?.image ?? ""}
@@ -1452,7 +1452,7 @@ function SiteTab({
                     className={inputCls}
                   />
                 ) : field.key === "resumeUrl" ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <input
                       value={values.resumeUrl || ""}
                       onChange={setField("resumeUrl")}
@@ -1533,18 +1533,18 @@ function SiteTab({
           ))}
         </div>
 
-        <div className="flex justify-end gap-3 mt-6">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
           <button
             type="button"
             onClick={() => setValues(DEFAULT_SITE_CONTENT)}
-            className="px-4 py-2 rounded-full text-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+            className="w-full sm:w-auto px-4 py-2 rounded-full text-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
           >
             Reset to defaults
           </button>
           <button
             type="submit"
             disabled={busy}
-            className="flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-medium bg-[#ff5c00] hover:bg-[#ff5c00]/90 text-white transition-colors disabled:opacity-50"
           >
             {busy && <Loader2 className="w-4 h-4 animate-spin" />}
             Save changes

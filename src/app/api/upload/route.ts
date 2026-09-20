@@ -26,8 +26,13 @@ async function extractText(buffer: Buffer, mimeType: string, fileName: string): 
     return result.value || "";
   }
 
-  // Fall back to the raw text for unsupported plain-text formats
-  return buffer.toString("utf8");
+  // Fall back to the raw text for supported plain-text formats
+  if (mimeType.startsWith("text/") || name.endsWith(".txt") || name.endsWith(".md") || name.endsWith(".csv")) {
+    return buffer.toString("utf8");
+  }
+
+  // Do not attempt to parse binary files (like images) as utf8 text
+  return "";
 }
 
 export async function POST(request: Request) {
